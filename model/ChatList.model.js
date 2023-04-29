@@ -1,7 +1,7 @@
 import  mongoose from 'mongoose';
 
 export const chatList = new mongoose.Schema({
-    email:{
+    username:{
         type:String,
         required:true
     },

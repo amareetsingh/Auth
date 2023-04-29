@@ -346,10 +346,10 @@ export  async function chathistory (req, res){
 // // chatlist 
 
  export async function chatlist (req, res){
-    const { chat_id, chat_name, email } = req.body;
+    const { chat_id, chat_name, username } = req.body;
     try {
       const newChatList = new ChatList({
-        email,
+        username,
         chat_id,
         chat_name,
       });
@@ -378,10 +378,10 @@ export  async function chathistory (req, res){
   }
 export  async function getchatlist (req, res){
     try {
-     const {email} = req.body;
+     const {username} = req.body;
       // const token = req.cookies.jwtoken;
   
-    const response = await ChatList.find({email:email});
+    const response = await ChatList.find({username:username});
       res.send(response);
     
     } catch (error) {
