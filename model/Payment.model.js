@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
+import  mongoose from   'mongoose';
 
 const pySchema = new mongoose.Schema({
     email:{

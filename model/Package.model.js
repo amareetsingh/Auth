@@ -27,6 +27,7 @@ export const PackSchema = new mongoose.Schema({
 });
 
 const Package = mongoose.model("PACK", PackSchema);
+
 const createDocument = async () => {
   try {
     const pack = new Package({
@@ -46,6 +47,7 @@ const createDocument = async () => {
     const result = await Package.insertMany([pack, newpack]);
   } catch (error) {}
 };
+
 createDocument();
 
 export default Package

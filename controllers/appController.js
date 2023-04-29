@@ -5,10 +5,12 @@ import ENV from '../config.js'
 
 import otpGenerator from 'otp-generator';
 import Package from '../model/Package.model.js'
+import Stripe from 'stripe';
+const stripe = new Stripe("sk_test_51MmypUSIVChpnvMqKRIcVKN7H2jDO7lFw12F6gDht9vibcfPg7JKFqJaDepfV0gmEosbcA4vU7TfAzEyj1shtRxy00tm9Krpdr");
 
-// import ChatList from '../model/ChatList.model.js';
-// import ChatHistoryModel from '../model/ChatHistory.model.js';
-// import PaymentModel from '../model/Payment.model.js';
+import ChatList from '../model/ChatList.model.js';
+import ChatHistoryModel from '../model/ChatHistory.model.js';
+import PaySchema from '../model/Payment.model.js';
 
 /** middleware for verify user */
 export async function verifyUser(req, res, next){
@@ -27,22 +29,11 @@ export async function verifyUser(req, res, next){
 }
 
 
-/** POST: http://localhost:8080/api/register 
- * @param : {
-  "username" : "example123",
-  "password" : "admin123",
-  "email": "example@gmail.com",
-  "firstName" : "bill",
-  "lastName": "william",
-  "mobile": 8009860560,
-  "address" : "Apt. 556, Kulas Light, Gwenborough",
-  "profile": ""
-}
-*/
+
 export async function register(req,res){
 
     try {
-        const { username, password, profile, email } = req.body;        
+        const { username, password, profile, email, address,mobile,lastName,firstName } = req.body;        
 
         // check the existing user
         const existUsername = new Promise((resolve, reject) => {
@@ -75,7 +66,11 @@ export async function register(req,res){
                                 username,
                                 password: hashedPassword,
                                 profile: profile || '',
-                                email
+                                email,
+                                address,
+                                mobile,
+                                lastName,
+                                firstName
                             });
 
                             // return save result as a response
@@ -101,12 +96,7 @@ export async function register(req,res){
 }
 
 
-/** POST: http://localhost:8080/api/login 
- * @param: {
-  "username" : "example123",
-  "password" : "admin123"
-}
-*/
+
 export async function login(req,res){
    
     const { username, password } = req.body;
@@ -147,7 +137,6 @@ export async function login(req,res){
 }
 
 
-/** GET: http://localhost:8080/api/user/example123 */
 export async function getUser(req,res){
     
     const { username } = req.params;
@@ -174,16 +163,7 @@ export async function getUser(req,res){
 }
 
 
-/** PUT: http://localhost:8080/api/updateuser 
- * @param: {
-  "header" : "<token>"
-}
-body: {
-    firstName: '',
-    address : '',
-    profile : ''
-}
-*/
+
 export async function updateUser(req,res){
     try {
         
@@ -210,7 +190,6 @@ export async function updateUser(req,res){
 }
 
 
-/** GET: http://localhost:8080/api/generateOTP */
 export async function generateOTP(req,res){
     req.app.locals.OTP = await otpGenerator.generate(6, { lowerCaseAlphabets: false, upperCaseAlphabets: false, specialChars: false})
     res.status(201).send({ code: req.app.locals.OTP })
@@ -230,7 +209,7 @@ export async function verifyOTP(req,res){
 
 
 // successfully redirect user when OTP is valid
-/** GET: http://localhost:8080/api/createResetSession */
+
 export async function createResetSession(req,res){
    if(req.app.locals.resetSession){
         return res.status(201).send({ flag : req.app.locals.resetSession})
@@ -240,7 +219,6 @@ export async function createResetSession(req,res){
 
 
 // update the password when we have valid session
-/** PUT: http://localhost:8080/api/resetPassword */
 export async function resetPassword(req,res){
     try {
         
@@ -301,9 +279,10 @@ export async function getPackages(req, res){
 export async function stripePayment(req, res){
   const { item, token } = req.body;
   console.log('item', item)
+  console.log('ittokeem', token)
   const customerId = await stripe.customers.create({
     name:item.name,
-    email:item.email
+    email:token.email
   })
 
   stripe.paymentIntents
@@ -320,12 +299,12 @@ export async function stripePayment(req, res){
         name: item.name,
         price: item.price,
         features: item.features,
-        package_code: token.id,
+        package_code: item.package_code,
         count_limit: item.count_limit,
       });
 
       const userRegister = user.save();
-      res.status(200).send({ user, charge });
+      res.status(200).json({ success:true, user, charge });
     })
     .catch((err) => {
       res.send(err);
@@ -337,81 +316,94 @@ export async function stripePayment(req, res){
 // // chathistory 
 
 
-// export default async function chathistory (req, res){
-//     const token = req.cookies.jwtoken;
+export  async function chathistory (req, res){
   
-//     const {
-//       chat_id,
-//       chat_name,
-//       response_text,
-//       generate_word,
-//       chat_max_tokens,
-//       chat_industry,
-//     } = req.body;
-//     try {
-//       const newChatHistory = new ChatHistoryModel({
-//         token:token,
-//         chat_id,
-//         chat_name,
-//         response_text,
-//         generate_word,
-//         chat_max_tokens,
-//         chat_industry,
-//       });
+    const {
+      chat_id,
+      chat_name,
+      response_text,
+      generate_word,
+      chat_max_tokens,
+      chat_industry,
+    } = req.body;
+    try {
+      const newChatHistory = new ChatHistoryModel({
+        chat_id,
+        chat_name,
+        response_text,
+        generate_word,
+        chat_max_tokens,
+        chat_industry,
+      });
   
-//       const chathistory = newChatHistory.save();
-//       res.status(200).send("new Chat history successfuly created ");
-//     } catch (error) {
-//       res.status(400).json(error);
-//     }
-//   };
+      const chathistory = newChatHistory.save();
+      res.status(200).send("new Chat history successfuly created ");
+    } catch (error) {
+      res.status(400).json(error);
+    }
+  };
 
 // // chatlist 
 
-//  export default async function chatlist (req, res){
-//     const { chat_id, chat_name } = req.body;
-//     const userExist = await User.findOne({ "tokens.token": req.cookies.jwtoken });
+ export async function chatlist (req, res){
+    const { chat_id, chat_name, email } = req.body;
+    try {
+      const newChatList = new ChatList({
+        email,
+        chat_id,
+        chat_name,
+      });
   
-//     try {
-//       const newChatList = new ChatList({
-//         email:userExist.email,
-//         chat_id,
-//         chat_name,
-//       });
-  
-//       const chatList = newChatList.save();
-//       res.status(200).send("new Chat list successfuly created ");
-//     } catch (error) {
-//       res.status(400).send(error);
-//     }
-//   }
+      const chatList = newChatList.save();
+      res.status(200).send("new Chat list successfuly created ");
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  }
 
-//    export default async function getchathistory (req, res){
-//     try {
-//     const token = req.cookies.jwtoken;
+   export  async function getchathistory (req, res){
+    try {
   
-//       const chathistory = await ChatHistoryModel.findOne({
-//         chat_id: req.body.chat_id,
-//       });
-//       if (chathistory)  {
-//         res.status(200).send(chathistory);
-//       } else {
-//         res.status(422).send("chat history not found");
-//       }
-//     } catch (error) {
-//       res.status(400).send(error);
-//     }
-//   }
-// export default async function getchatlist (req, res){
-//     try {
-//       const userExist = await User.findOne({ "tokens.token": req.cookies.jwtoken });
-//       // const token = req.cookies.jwtoken;
+      const chathistory = await ChatHistoryModel.findOne({
+        chat_id: req.body.chat_id,
+      });
+      if (chathistory)  {
+        res.status(200).send(chathistory);
+      } else {
+        res.status(422).send("chat history not found");
+      }
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  }
+export  async function getchatlist (req, res){
+    try {
+     const {email} = req.body;
+      // const token = req.cookies.jwtoken;
   
-//     const response = await ChatList.find({email:userExist.email});
-//       res.send(response);
+    const response = await ChatList.find({email:email});
+      res.send(response);
     
-//     } catch (error) {
-//       res.status(400).send(error);
-//     }
-//   }
+    } catch (error) {
+      res.status(400).send(error);
+    }
+  }
   
+
+  export async function getPaymentDetalis (req, res){
+    try {
+        const {email} = req.body;
+         // const token = req.cookies.jwtoken;
+     
+       const response = await PaySchema.find({email:email});
+       if(!response){
+        res.status(400).json({success:false});
+
+       }
+         res.status(200).json({success:true});
+       
+       } catch (error) {
+         res.status(400).send(error);
+       }
+
+  }

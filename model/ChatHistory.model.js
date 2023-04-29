@@ -1,11 +1,8 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 
 const chatHistory = new mongoose.Schema({
-    token:{
-        type:String,
-        required:true
-    },
+   
     chat_id:{
         type:String,
         required:true
@@ -34,4 +31,4 @@ const chatHistory = new mongoose.Schema({
 });
 
 
-export default mongoose.model.ChatHistory || mongoose.model('CHATHISTORY', chatHistory);
+export default mongoose.model.ChatHistoryModel || mongoose.model('CHATHISTORY', chatHistory);

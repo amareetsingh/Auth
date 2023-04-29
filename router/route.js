@@ -28,7 +28,12 @@ router.route('/resetPassword').put(controller.verifyUser, controller.resetPasswo
 // get package 
 
 router.route('/package').get(controller.getPackages);
-router.route('/checkout').get(controller.stripePayment);
+router.route('/checkout').post(controller.stripePayment);
+router.route('/chatlist').post(controller.chatlist);
+router.route('/getChatlist').post(controller.getchatlist);
+router.route('/chatHistory').post(controller.chathistory);
+router.route('/getChatHistory').post(controller.getchathistory);
+router.route('/getPaymentDetalis').post(controller.getPaymentDetalis);
 
 
 export default router;
