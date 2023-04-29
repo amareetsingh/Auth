@@ -28,6 +28,7 @@ router.route('/resetPassword').put(controller.verifyUser, controller.resetPasswo
 // get package 
 
 router.route('/package').get(controller.getPackages);
+router.route('/checkout').get(controller.stripePayment);
 
 
 export default router;

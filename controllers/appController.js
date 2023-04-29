@@ -2,8 +2,10 @@ import UserModel from '../model/User.model.js'
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import ENV from '../config.js'
+
 import otpGenerator from 'otp-generator';
 import Package from '../model/Package.model.js'
+
 // import ChatList from '../model/ChatList.model.js';
 // import ChatHistoryModel from '../model/ChatHistory.model.js';
 // import PaymentModel from '../model/Payment.model.js';
@@ -294,37 +296,43 @@ export async function getPackages(req, res){
 }
 
 
-// // stripe payment 
+// stripe payment 
 
-// export async function stripePayment(req, res){
-//   const { item, token } = req.body;
+export async function stripePayment(req, res){
+  const { item, token } = req.body;
+  console.log('item', item)
+  const customerId = await stripe.customers.create({
+    name:item.name,
+    email:item.email
+  })
 
-//   stripe.paymentIntents
-//     .create({
-//       payment_method_types: ["card"],
-//       amount: item.price, // Charging Rs 25
-//       description: `Purchased the package2 ${item.name}`,
-//       currency: "INR",
-//       customer: customer.id,
-//     })
-//     .then((charge) => {
-//       const user = new PaySchema({
-//         email: token.email,
-//         name: item.name,
-//         price: item.price,
-//         features: item.features,
-//         package_code: token.id,
-//         count_limit: item.count_limit,
-//       });
+  stripe.paymentIntents
+    .create({
+      payment_method_types: ["card"],
+      amount: item.price, // Charging Rs 25
+      description: `Purchased the package2 ${item.name}`,
+      currency: "INR",
+      customer: customerId.id,
+    })
+    .then((charge) => {
+      const user = new PaySchema({
+        email: token.email,
+        name: item.name,
+        price: item.price,
+        features: item.features,
+        package_code: token.id,
+        count_limit: item.count_limit,
+      });
 
-//       const userRegister = user.save();
-//       res.status(200).send({ user, charge });
-//     })
-//     .catch((err) => {
-//       res.send(err);
-//     });
+      const userRegister = user.save();
+      res.status(200).send({ user, charge });
+    })
+    .catch((err) => {
+      res.send(err);
+    });
+}
 
-// }
+
 
 // // chathistory 
 

@@ -21,11 +21,12 @@ export const PackSchema = new mongoose.Schema({
 
   package_code: {
     type: String,
-    required: false,
+    required: true,
+    unique:true
   },
 });
 
-const Package = mongoose.model("PACKAGE", PackSchema);
+const Package = mongoose.model("PACK", PackSchema);
 const createDocument = async () => {
   try {
     const pack = new Package({
@@ -43,9 +44,8 @@ const createDocument = async () => {
       package_code: "djhdghakjghakjhdgkajhgkdjhgk",
     });
     const result = await Package.insertMany([pack, newpack]);
-    console.log("results", result);
   } catch (error) {}
 };
 createDocument();
 
-export default mongoose.model.Package ||Package
+export default Package
