@@ -390,13 +390,11 @@ export async function getPaymentDetalis(req, res) {
     // res.setHeader();
     // const token = req.cookies.jwtoken;
     const doc = await PaySchema.find({email:email}).sort({$natural:-1}).limit(1);
-      console.log('doc', doc)
-    
 
     if (!doc) {
       return res.status(400).json({ success: false });
     }
-    // res.status(200).json({ success: true, doc });
+    res.status(200).json({ success: true, doc });
   } catch (error) {
     return res.status(400).send(error);
   }
