@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import connect from './database/conn.js';
 import router from './router/route.js';
 import dotenv from 'dotenv'
+import  cookieParser from 'cookie-parser';
+
 const app = express();
 
 /** middlewares */
@@ -12,6 +14,7 @@ app.use(cors());
 app.use(morgan('tiny'));
 app.disable('x-powered-by'); // less hackers know about our stack
 dotenv.config({path:'./Config/.env'})
+app.use(cookieParser());
 
 
 const port = 8080;
