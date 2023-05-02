@@ -170,7 +170,7 @@ export async function updateUser(req, res) {
   try {
     // const id = req.query.id;
     const { userId } = req.user;
-console.log('useid', userId)
+    console.log("useid", userId);
     if (userId) {
       const body = req.body;
 
@@ -374,7 +374,7 @@ export async function getchathistory(req, res) {
 }
 export async function getchatlist(req, res) {
   try {
-    const { username } = req.body;
+    const { username, email } = req.body;
     // const token = req.cookies.jwtoken;
 
     const response = await ChatList.find({ username: username });
@@ -386,16 +386,60 @@ export async function getchatlist(req, res) {
 
 export async function getPaymentDetalis(req, res) {
   try {
-    const { email } = req.body;
-    // res.setHeader();
-    // const token = req.cookies.jwtoken;
-    const doc = await PaySchema.find({email:email}).sort({$natural:-1}).limit(1);
+    const { username , email} = req.body;
+    if (username) {
+      const users = await UserModel.findOne({ username });
+      console.log("userss", users);
+      // res.setHeader();
+      // const token = req.cookies.jwtoken;
+      const doc = await PaySchema.find({ email: users.email })
+        .sort({ $natural: -1 })
+        .limit(1);
 
-    if (!doc) {
-      return res.status(400).json({ success: false });
+      if (!doc) {
+        return res.status(400).json({ success: false });
+      }
+      res.status(200).json({ success: true, doc });
+    } else {
+    
+      const doc = await PaySchema.find({ email: email })
+        .sort({ $natural: -1 })
+        .limit(1);
+
+      if (!doc) {
+        return res.status(400).json({ success: false });
+      }
+      res.status(200).json({ success: true, doc });
     }
-    res.status(200).json({ success: true, doc });
   } catch (error) {
     return res.status(400).send(error);
+  }
+}
+
+export async function stripePaymentUpdate(req, res) {
+  try {
+    const update = await PaySchema.findOneAndUpdate(
+      { _id: req.params.id },
+      {
+        $set: {
+          name: req.body.name,
+          email: req.body.email,
+          features: req.body.features,
+          count_limit: req.body.count_limit,
+          package_code: req.body.package_code,
+          price: req.body.price,
+        },
+      }
+    );
+
+    if (!update) {
+      return res
+        .status(401)
+        .json({ success: false, message: "payment details not found" });
+    }
+
+    res.status(201).json({ success: true, update });
+  } catch (error) {
+    return res.status(401).json({ sucess: false, error: error });
   }
 }

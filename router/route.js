@@ -29,6 +29,7 @@ router.route('/resetPassword').put(controller.verifyUser, controller.resetPasswo
 
 router.route('/package').get(controller.getPackages);
 router.route('/checkout').post(controller.stripePayment);
+router.route('/checkout/:id').put(controller.stripePaymentUpdate);
 router.route('/chatlist').post(controller.chatlist);
 router.route('/getChatlist').post(controller.getchatlist);
 router.route('/chatHistory').post(controller.chathistory);
